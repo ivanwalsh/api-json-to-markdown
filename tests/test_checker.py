@@ -1,7 +1,7 @@
 import unittest
 
 from docgen import check_spec, load_spec, normalize_spec, validate_spec
-from tests import EXAMPLE_SPEC
+from tests import EXAMPLE_SPEC, FIXTURES
 
 
 def clean_endpoint(**overrides):
@@ -130,14 +130,19 @@ class CheckerTests(unittest.TestCase):
         )
         self.assertEqual(found, warnings_for(first, second))  # same every run
 
-    def test_library_example_has_three_missing_descriptions(self):
+    def test_library_example_is_clean(self):
+        # The example is the project's showcase, so it must stay warning-free.
         found = check_spec(normalize_spec(load_spec(EXAMPLE_SPEC)))
+        self.assertEqual([str(w) for w in found], [])
+
+    def test_minimal_fixture_has_known_warnings(self):
+        # valid_minimal.json is deliberately imperfect, so tests can rely on it.
+        found = check_spec(normalize_spec(load_spec(FIXTURES / "valid_minimal.json")))
         self.assertEqual(
             [(w.location, w.code) for w in found],
             [
-                ("endpoints[1]", "missing-description"),
-                ("endpoints[2]", "missing-description"),
-                ("endpoints[4]", "missing-description"),
+                ("endpoints[0]", "missing-description"),
+                ("endpoints[0] response 200", "success-without-example"),
             ],
         )
 

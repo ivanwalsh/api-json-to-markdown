@@ -29,8 +29,8 @@ class CommandLineTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             expected = (EXPECTED / "library_api.md").read_text(encoding="utf-8")
             self.assertEqual(output.read_text(encoding="utf-8"), expected)
-            # The example has quality warnings: shown, but exit code stays 0.
-            self.assertIn("3 quality warning(s)", result.stderr)
+            # The example is clean, so no warnings are printed.
+            self.assertNotIn("quality warning", result.stderr)
 
     def test_no_output_path_prints_markdown(self):
         result = run_docgen(FIXTURES / "valid_minimal.json")
@@ -41,14 +41,18 @@ class CommandLineTests(unittest.TestCase):
         self.assertIn("quality warning(s)", result.stderr)
 
     def test_check_clean_spec_exits_0(self):
-        result = run_docgen("--check", FIXTURES / "valid_clean.json")
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("No warnings", result.stdout)
+        for spec in (FIXTURES / "valid_clean.json", EXAMPLE_SPEC):
+            with self.subTest(spec=spec.name):
+                result = run_docgen("--check", spec)
+                self.assertEqual(result.returncode, 0, result.stdout)
+                self.assertIn("No warnings", result.stdout)
 
     def test_check_with_warnings_exits_3_and_writes_nothing(self):
+        # valid_minimal.json is deliberately imperfect (see test_checker.py).
+        spec = FIXTURES / "valid_minimal.json"
         with tempfile.TemporaryDirectory() as folder:
             result = subprocess.run(
-                [sys.executable, "-m", "docgen", "--check", str(EXAMPLE_SPEC)],
+                [sys.executable, "-m", "docgen", "--check", str(spec)],
                 cwd=folder,  # run somewhere empty so we can see nothing was written
                 env={**os.environ, "PYTHONPATH": str(PROJECT_ROOT)},
                 capture_output=True,
@@ -56,7 +60,7 @@ class CommandLineTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(result.returncode, 3, result.stderr)
-            self.assertIn("3 warning(s)", result.stdout)
+            self.assertIn("2 warning(s)", result.stdout)
             self.assertIn("[missing-description]", result.stdout)
             self.assertEqual(list(Path(folder).iterdir()), [])
 

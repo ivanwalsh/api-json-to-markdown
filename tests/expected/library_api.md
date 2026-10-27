@@ -79,7 +79,7 @@ Returns a single book by its ID, including whether it is available
 
 Register a member
 
-Post a single book by its ID, including whether it is available
+Registers a member by its name and email address
 
 ### Parameters
 
@@ -142,7 +142,7 @@ A member can hold at most five books at a time.
 
 Return a book
 
-Deletes a single book by its ID, including whether it is available
+Ends a loan when a member returns a book. The book becomes available to borrow again.
 
 ### Parameters
 
