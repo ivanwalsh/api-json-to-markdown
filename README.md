@@ -1,12 +1,23 @@
-# AI Documentation Lab
+# API JSON to Markdown
 
-A small educational tool that reads a fictional API specification written in JSON and generates Markdown documentation. The code is plain, deterministic Python: the same input always gives byte-for-byte the same output.
+Turn a JSON API spec into clear, ready-to-publish Markdown docs.
+
+You describe your API's endpoints, parameters and responses in one JSON file. The tool checks it, flags gaps in the documentation, and writes a Markdown reference with a table of contents, parameter tables, copy-and-paste curl examples and response samples. It's plain, deterministic Python: the same input always gives byte-for-byte the same output.
 
 Requirements: Python 3.10 or later. Standard library only, nothing to install.
 
+> **Note:** the input is this tool's own simplified JSON format (see [Spec schema](#spec-schema)), not OpenAPI or Swagger. OpenAPI support is planned.
+
+## Get the code
+
+```
+git clone https://github.com/ivanwalsh/api-json-to-markdown.git
+cd api-json-to-markdown
+```
+
 ## Quick start
 
-Run these from this folder:
+Run these from the project folder:
 
 ```
 python -m docgen examples/library_api.json output/library_api.md   # write a file
@@ -125,3 +136,7 @@ cp output/library_api.md tests/expected/library_api.md
 ```
 
 Only copy it across once you are sure the new output is what you want.
+
+## About
+
+Built as a learning project, step by step, with a test for every rule. No AI is involved in generating the docs: every line of output comes from the spec, so the results are predictable and easy to review.
