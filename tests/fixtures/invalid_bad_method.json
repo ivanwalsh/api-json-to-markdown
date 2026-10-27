@@ -1,0 +1,8 @@
+{
+  "name": "Bad Method API",
+  "version": "1.0.0",
+  "base_url": "https://bad.example.test",
+  "endpoints": [
+    {"method": "FETCH", "path": "/x", "summary": "X", "responses": [{"status": 200, "description": "OK"}]}
+  ]
+}

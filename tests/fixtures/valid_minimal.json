@@ -1,0 +1,15 @@
+{
+  "name": "Tiny API",
+  "version": "0.1.0",
+  "base_url": "https://tiny.example.test",
+  "endpoints": [
+    {
+      "method": "get",
+      "path": "/ping",
+      "summary": "Check the service is up",
+      "responses": [
+        {"status": 200, "description": "Service is up"}
+      ]
+    }
+  ]
+}

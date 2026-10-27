@@ -1,0 +1,8 @@
+{
+  "name": "",
+  "version": "1.0.0",
+  "base_url": "ftp://files.example.test",
+  "endpoints": [
+    {"method": "GET", "path": "x", "summary": "X", "responses": [{"status": 200, "description": "OK"}]}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Broken API",
+  "version": "1.0.0",
+  "base_url": "https://broken.example.test",
+  "endpoints": [
+    {"method": "GET", "path": "/x", "summary": "X", "responses": [{"status": 200, "description": "OK"}]}
+  ]

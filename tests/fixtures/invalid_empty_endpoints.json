@@ -1,0 +1,6 @@
+{
+  "name": "Empty API",
+  "version": "1.0.0",
+  "base_url": "https://empty.example.test",
+  "endpoints": []
+}
