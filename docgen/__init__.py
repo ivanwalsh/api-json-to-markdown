@@ -6,10 +6,12 @@ The pipeline, one module per step:
     validator.validate_spec       check the data (raises SpecError)
     normalizer.normalize_spec     fill defaults, fix ordering
     renderer.render_markdown      data  -> Markdown text
+    checker.check_spec            data  -> quality warnings (optional)
 
 generate_markdown() below runs steps 2 to 4 in one call.
 """
 
+from .checker import QualityWarning, check_spec
 from .errors import SpecError, SpecFileError
 from .loader import load_spec, parse_spec
 from .normalizer import normalize_spec
@@ -24,8 +26,10 @@ def generate_markdown(raw_spec):
 
 
 __all__ = [
+    "QualityWarning",
     "SpecError",
     "SpecFileError",
+    "check_spec",
     "generate_markdown",
     "load_spec",
     "normalize_spec",

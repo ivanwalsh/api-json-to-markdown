@@ -11,15 +11,19 @@ Run these from this folder:
 ```
 python -m docgen examples/library_api.json output/library_api.md   # write a file
 python -m docgen examples/library_api.json                         # print to screen
+python -m docgen --check examples/library_api.json                 # quality check only
 python -m unittest -v                                              # run all tests
 ```
 
-Exit codes: `0` success, `1` the spec is invalid, `2` the file could not be read.
+On Linux and macOS, use `python3` wherever this file says `python`.
+
+Exit codes: `0` success, `1` the spec is invalid, `2` the file could not be read, `3` `--check` found quality warnings.
 
 ## How it works
 
 ```
 JSON file -> load -> validate -> normalize -> render -> Markdown file
+                                           -> check  -> quality warnings
 ```
 
 | Step | Module | Job |
@@ -28,6 +32,7 @@ JSON file -> load -> validate -> normalize -> render -> Markdown file
 | Validate | `docgen/validator.py` | Check every schema rule and report all problems at once. |
 | Normalize | `docgen/normalizer.py` | Uppercase methods, fill defaults, sort responses, drop unknown fields. |
 | Render | `docgen/renderer.py` | Build Markdown text. Never touches files. |
+| Check | `docgen/checker.py` | Find valid but unhelpful docs. Warnings only, never changes the Markdown. |
 | Write | `docgen/__main__.py` | Command line handling, save with `\n` line endings. |
 
 `docgen/errors.py` holds the two error types: `SpecError` (bad spec) and `SpecFileError` (cannot read file).
@@ -55,6 +60,30 @@ tests/
 **Response:** `status` (integer 100 to 599, unique per endpoint), `description` (required), `example` (any JSON, optional).
 
 Unknown fields are ignored. Endpoints and parameters keep the author's order. Responses are sorted by status code.
+
+## Quality check
+
+The validator asks "can we build docs from this?" The quality check asks "are these docs any good?" Its findings are warnings: the docs are still built and the exit code stays 0. Use `--check` to run the check on its own; it writes nothing and exits 3 if it finds anything.
+
+| Code | Warns when |
+|---|---|
+| `summary-style` | A summary is over 80 characters or ends with a full stop |
+| `missing-description` | An endpoint has no description |
+| `missing-param-description` | A parameter has no description |
+| `path-param-required` | A path parameter isn't marked `required: true` |
+| `unused-path-param` | A parameter says `in: path` but the path has no `{name}` for it |
+| `undeclared-path-param` | The path has `{name}` but no matching parameter with `in: path` |
+| `no-success-response` | An endpoint has no 2xx response |
+| `success-without-example` | A 2xx response (other than 204 No Content) has no example |
+
+Example output:
+
+```
+  - endpoints[1]: no description [missing-description]
+1 warning(s)
+```
+
+During normal generation, warnings go to standard error, so they never end up inside Markdown printed to the screen.
 
 ## Determinism rules
 

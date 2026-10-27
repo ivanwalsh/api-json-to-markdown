@@ -1,0 +1,16 @@
+{
+  "name": "Clean API",
+  "version": "1.0.0",
+  "base_url": "https://clean.example.test",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/status",
+      "summary": "Check the service status",
+      "description": "Returns the current status of the service.",
+      "responses": [
+        {"status": 200, "description": "Service status", "example": {"status": "up"}}
+      ]
+    }
+  ]
+}
