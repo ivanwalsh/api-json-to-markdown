@@ -41,6 +41,9 @@ def _normalize_parameter(parameter):
         "type": parameter["type"],
         "required": parameter.get("required", False),
         "description": parameter.get("description", "").strip(),
+        # Like response examples, an example can legitimately be null.
+        "has_example": "example" in parameter,
+        "example": parameter.get("example"),
     }
 
 

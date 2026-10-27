@@ -25,7 +25,13 @@ Returns books in the catalogue. Filters can be combined.
 |---|---|---|---|---|
 | author | query | string | no | Only books by this author |
 | available | query | boolean | no | true for books not currently on loan |
-| limit | query | integer | no | Maximum number of results (default 20) |
+| limit | query | integer | no | Maximum number of results (default 10) |
+
+### Example request
+
+```bash
+curl 'https://api.example-library.test/books?author=Yukio%20Mishima&available=true'
+```
 
 ### Responses
 
@@ -34,16 +40,16 @@ Returns books in the catalogue. Filters can be combined.
 ```json
 [
   {
-    "author": "Herman Melville",
+    "author": "Yukio Mishima",
     "available": true,
-    "id": 7,
-    "title": "Moby Dick"
+    "id": 21,
+    "title": "The Sound of Waves"
   },
   {
-    "author": "James Joyce",
-    "available": false,
-    "id": 12,
-    "title": "Dubliners"
+    "author": "Yukio Mishima",
+    "available": true,
+    "id": 22,
+    "title": "Spring Snow"
   }
 ]
 ```
@@ -59,6 +65,12 @@ Returns a single book by its ID, including whether it is available
 | Name | In | Type | Required | Description |
 |---|---|---|---|---|
 | id | path | integer | yes | The book's id |
+
+### Example request
+
+```bash
+curl 'https://api.example-library.test/books/7'
+```
 
 ### Responses
 
@@ -87,6 +99,14 @@ Registers a member by its name and email address
 |---|---|---|---|---|
 | name | body | string | yes | Full name |
 | email | body | string | yes | Contact email address |
+
+### Example request
+
+```bash
+curl -X POST 'https://api.example-library.test/members' \
+  -H 'Content-Type: application/json' \
+  -d '{"email": "aoife@example.test", "name": "Aoife Byrne"}'
+```
 
 ### Responses
 
@@ -121,6 +141,14 @@ A member can hold at most five books at a time.
 | book_id | body | integer | yes | The book to lend |
 | member_id | body | integer | yes | The member borrowing it |
 
+### Example request
+
+```bash
+curl -X POST 'https://api.example-library.test/loans' \
+  -H 'Content-Type: application/json' \
+  -d '{"book_id": 7, "member_id": 301}'
+```
+
 ### Responses
 
 #### 201: Loan created
@@ -149,6 +177,12 @@ Ends a loan when a member returns a book. The book becomes available to borrow a
 | Name | In | Type | Required | Description |
 |---|---|---|---|---|
 | id | path | integer | yes | The loan id |
+
+### Example request
+
+```bash
+curl -X DELETE 'https://api.example-library.test/loans/9001'
+```
 
 ### Responses
 

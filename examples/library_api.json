@@ -10,17 +10,17 @@
       "summary": "List books",
       "description": "Returns books in the catalogue. Filters can be combined.",
       "parameters": [
-        {"name": "author", "in": "query", "type": "string", "description": "Only books by this author"},
-        {"name": "available", "in": "query", "type": "boolean", "description": "true for books not currently on loan"},
-        {"name": "limit", "in": "query", "type": "integer", "description": "Maximum number of results (default 20)"}
+        {"name": "author", "in": "query", "type": "string", "description": "Only books by this author", "example": "Yukio Mishima"},
+        {"name": "available", "in": "query", "type": "boolean", "description": "true for books not currently on loan", "example": true},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Maximum number of results (default 10)"}
       ],
       "responses": [
         {
           "status": 200,
           "description": "A list of books",
           "example": [
-            {"id": 7, "title": "Moby Dick", "author": "Herman Melville", "available": true},
-            {"id": 12, "title": "Dubliners", "author": "James Joyce", "available": false}
+            {"id": 21, "title": "The Sound of Waves", "author": "Yukio Mishima", "available": true},
+            {"id": 22, "title": "Spring Snow", "author": "Yukio Mishima", "available": true}
           ]
         }
       ]
@@ -31,7 +31,7 @@
       "summary": "Get one book",
       "description": "Returns a single book by its ID, including whether it is available",
       "parameters": [
-        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The book's id"}
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The book's id", "example": 7}
       ],
       "responses": [
         {"status": 200, "description": "Book found", "example": {"id": 7, "title": "Moby Dick", "author": "Herman Melville", "available": true}},
@@ -44,8 +44,8 @@
       "summary": "Register a member",
       "description": "Registers a member by its name and email address",
       "parameters": [
-        {"name": "name", "in": "body", "type": "string", "required": true, "description": "Full name"},
-        {"name": "email", "in": "body", "type": "string", "required": true, "description": "Contact email address"}
+        {"name": "name", "in": "body", "type": "string", "required": true, "description": "Full name", "example": "Aoife Byrne"},
+        {"name": "email", "in": "body", "type": "string", "required": true, "description": "Contact email address", "example": "aoife@example.test"}
       ],
       "responses": [
         {"status": 201, "description": "Member created", "example": {"id": 301, "name": "Aoife Byrne", "email": "aoife@example.test"}},
@@ -58,8 +58,8 @@
       "summary": "Lend a book to a member",
       "description": "A member can hold at most five books at a time.",
       "parameters": [
-        {"name": "book_id", "in": "body", "type": "integer", "required": true, "description": "The book to lend"},
-        {"name": "member_id", "in": "body", "type": "integer", "required": true, "description": "The member borrowing it"}
+        {"name": "book_id", "in": "body", "type": "integer", "required": true, "description": "The book to lend", "example": 7},
+        {"name": "member_id", "in": "body", "type": "integer", "required": true, "description": "The member borrowing it", "example": 301}
       ],
       "responses": [
         {"status": 201, "description": "Loan created", "example": {"id": 9001, "book_id": 7, "member_id": 301, "due": "2026-11-15"}},
@@ -73,7 +73,7 @@
       "summary": "Return a book",
       "description": "Ends a loan when a member returns a book. The book becomes available to borrow again.",
       "parameters": [
-        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The loan id"}
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The loan id", "example": 9001}
       ],
       "responses": [
         {"status": 404, "description": "No loan with that id"},

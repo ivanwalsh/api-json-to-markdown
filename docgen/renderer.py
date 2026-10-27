@@ -12,6 +12,8 @@ Determinism rules followed here:
 
 import json
 
+from .curl import curl_lines
+
 
 def render_markdown(spec):
     lines = [f"# {_one_line(spec['name'])}", ""]
@@ -35,13 +37,13 @@ def render_markdown(spec):
     lines.append("")
 
     for endpoint in spec["endpoints"]:
-        lines += _render_endpoint(endpoint)
+        lines += _render_endpoint(endpoint, spec["base_url"])
 
     # Join, then make sure the file ends with exactly one newline.
     return "\n".join(lines).rstrip("\n") + "\n"
 
 
-def _render_endpoint(endpoint):
+def _render_endpoint(endpoint, base_url):
     lines = [
         f"## {_endpoint_title(endpoint)}",
         "",
@@ -69,6 +71,10 @@ def _render_endpoint(endpoint):
             ]
             lines.append(_table_row(cells))
         lines.append("")
+
+    lines += ["### Example request", ""]
+    lines += _code_block("\n".join(curl_lines(base_url, endpoint)), "bash")
+    lines.append("")
 
     lines += ["### Responses", ""]
     for response in endpoint["responses"]:

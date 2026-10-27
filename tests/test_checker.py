@@ -13,7 +13,7 @@ def clean_endpoint(**overrides):
         "description": "Returns a single book by its id.",
         "parameters": [
             {"name": "id", "in": "path", "type": "integer", "required": True,
-             "description": "The book's id"}
+             "description": "The book's id", "example": 7}
         ],
         "responses": [
             {"status": 200, "description": "Book found", "example": {"id": 7}},
@@ -53,6 +53,21 @@ class CheckerTests(unittest.TestCase):
         endpoint = clean_endpoint()
         del endpoint["parameters"][0]["description"]
         self.assertEqual(codes(warnings_for(endpoint)), ["missing-param-description"])
+
+    def test_required_param_without_example(self):
+        endpoint = clean_endpoint()
+        del endpoint["parameters"][0]["example"]
+        found = warnings_for(endpoint)
+        self.assertEqual(codes(found), ["missing-param-example"])
+        self.assertEqual(found[0].location, "endpoints[0].parameters[0]")
+
+    def test_optional_param_without_example_is_fine(self):
+        endpoint = clean_endpoint()
+        endpoint["parameters"].append(
+            {"name": "fields", "in": "query", "type": "string",
+             "description": "Fields to include"}
+        )
+        self.assertEqual(warnings_for(endpoint), [])
 
     def test_undeclared_path_param(self):
         found = warnings_for(clean_endpoint(parameters=[]))

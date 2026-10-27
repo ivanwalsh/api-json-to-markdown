@@ -13,6 +13,7 @@ Rules:
     summary-style              summary over 80 characters or ends with "."
     missing-description        endpoint has no description
     missing-param-description  parameter has no description
+    missing-param-example      required parameter has no example
     path-param-required        path parameter not marked required
     unused-path-param          path parameter not used in the path
     undeclared-path-param      {name} in the path has no path parameter
@@ -79,6 +80,10 @@ def _check_endpoint(endpoint, where):
 
         if not parameter["description"]:
             warn(p_where, f'parameter "{name}" has no description', "missing-param-description")
+
+        # Without an example, the curl command shows a <placeholder> instead.
+        if parameter["required"] and not parameter["has_example"]:
+            warn(p_where, f'required parameter "{name}" has no example', "missing-param-example")
 
         if parameter["in"] == "path":
             declared_path_params.add(name)

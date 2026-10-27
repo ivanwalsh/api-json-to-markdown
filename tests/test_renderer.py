@@ -62,7 +62,9 @@ class RenderingRulesTests(unittest.TestCase):
     def test_optional_sections_left_out_when_empty(self):
         markdown = generate_markdown(tiny_spec())
         self.assertNotIn("### Parameters", markdown)
-        self.assertNotIn("```", markdown)  # no examples, so no code blocks
+        # No response examples, so no JSON code blocks. (The curl block is
+        # always present, so we look for ```json specifically.)
+        self.assertNotIn("```json", markdown)
 
     def test_pipe_characters_are_escaped_in_tables(self):
         spec = tiny_spec(

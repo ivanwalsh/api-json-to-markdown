@@ -32,6 +32,7 @@ JSON file -> load -> validate -> normalize -> render -> Markdown file
 | Validate | `docgen/validator.py` | Check every schema rule and report all problems at once. |
 | Normalize | `docgen/normalizer.py` | Uppercase methods, fill defaults, sort responses, drop unknown fields. |
 | Render | `docgen/renderer.py` | Build Markdown text. Never touches files. |
+| Curl | `docgen/curl.py` | Build the example curl command for each endpoint. Called by the renderer. |
 | Check | `docgen/checker.py` | Find valid but unhelpful docs. Warnings only, never changes the Markdown. |
 | Write | `docgen/__main__.py` | Command line handling, save with `\n` line endings. |
 
@@ -55,11 +56,30 @@ tests/
 
 **Endpoint:** `method` (GET, POST, PUT, PATCH or DELETE, any case), `path` (starts with `/`), `summary` (required), `description` (optional), `parameters` (optional list), `responses` (non-empty list). Each method and path pair must be unique.
 
-**Parameter:** `name` (unique per endpoint), `in` (path, query, header or body), `type` (string, integer, number, boolean, array or object), `required` (true or false, default false), `description` (optional).
+**Parameter:** `name` (unique per endpoint), `in` (path, query, header or body), `type` (string, integer, number, boolean, array or object), `required` (true or false, default false), `description` (optional), `example` (any JSON, optional; used in the curl command).
 
 **Response:** `status` (integer 100 to 599, unique per endpoint), `description` (required), `example` (any JSON, optional).
 
 Unknown fields are ignored. Endpoints and parameters keep the author's order. Responses are sorted by status code.
+
+## Example requests
+
+Every endpoint gets a copy-and-paste curl command, built from `base_url`, the method, the path and the parameter examples:
+
+```bash
+curl -X POST 'https://api.example-library.test/loans' \
+  -H 'Content-Type: application/json' \
+  -d '{"book_id": 7, "member_id": 301}'
+```
+
+| `in` | Where it goes |
+|---|---|
+| `path` | Replaces `{name}` in the URL |
+| `query` | Added after `?`, URL-encoded |
+| `header` | Added as `-H 'Name: value'` |
+| `body` | Collected into one JSON object sent with `-d` |
+
+A required parameter with no `example` appears as a placeholder like `<book_id>`. An optional one with no example is left out.
 
 ## Quality check
 
@@ -70,6 +90,7 @@ The validator asks "can we build docs from this?" The quality check asks "are th
 | `summary-style` | A summary is over 80 characters or ends with a full stop |
 | `missing-description` | An endpoint has no description |
 | `missing-param-description` | A parameter has no description |
+| `missing-param-example` | A required parameter has no example (the curl command will show a placeholder) |
 | `path-param-required` | A path parameter isn't marked `required: true` |
 | `unused-path-param` | A parameter says `in: path` but the path has no `{name}` for it |
 | `undeclared-path-param` | The path has `{name}` but no matching parameter with `in: path` |
