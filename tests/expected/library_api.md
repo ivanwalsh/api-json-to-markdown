@@ -52,6 +52,8 @@ Returns books in the catalogue. Filters can be combined.
 
 Get one book
 
+Returns a single book by its ID, including whether it is available
+
 ### Parameters
 
 | Name | In | Type | Required | Description |
@@ -76,6 +78,8 @@ Get one book
 ## POST /members
 
 Register a member
+
+Post a single book by its ID, including whether it is available
 
 ### Parameters
 
@@ -137,6 +141,8 @@ A member can hold at most five books at a time.
 ## DELETE /loans/{id}
 
 Return a book
+
+Deletes a single book by its ID, including whether it is available
 
 ### Parameters
 
