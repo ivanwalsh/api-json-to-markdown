@@ -65,7 +65,7 @@ tests/
 
 **Top level:** `name` (string, required), `version` (string, required), `description` (string, optional), `base_url` (string starting with http:// or https://, required), `endpoints` (non-empty list, required).
 
-**Endpoint:** `method` (GET, POST, PUT, PATCH or DELETE, any case), `path` (starts with `/`), `summary` (required), `description` (optional), `parameters` (optional list), `responses` (non-empty list). Each method and path pair must be unique.
+**Endpoint:** `method` (GET, POST, PUT, PATCH or DELETE, any case), `path` (starts with `/`), `summary` (required), `description` (optional), `tag` (optional; groups the table of contents), `parameters` (optional list), `responses` (non-empty list). Each method and path pair must be unique.
 
 **Parameter:** `name` (unique per endpoint), `in` (path, query, header or body), `type` (string, integer, number, boolean, array or object), `required` (true or false, default false), `description` (optional), `example` (any JSON, optional; used in the curl command).
 

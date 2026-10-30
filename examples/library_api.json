@@ -8,6 +8,7 @@
       "method": "GET",
       "path": "/books",
       "summary": "List books",
+      "tag": "Books",
       "description": "Returns books in the catalogue. Filters can be combined.",
       "parameters": [
         {"name": "author", "in": "query", "type": "string", "description": "Only books by this author", "example": "Yukio Mishima"},
@@ -29,6 +30,7 @@
       "method": "GET",
       "path": "/books/{id}",
       "summary": "Get one book",
+      "tag": "Books",
       "description": "Returns a single book by its ID, including whether it is available.",
       "parameters": [
         {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The book's id", "example": 7}
@@ -42,6 +44,7 @@
       "method": "POST",
       "path": "/members",
       "summary": "Register a member",
+      "tag": "Members",
       "description": "Registers a member by its name and email address.",
       "parameters": [
         {"name": "name", "in": "body", "type": "string", "required": true, "description": "Full name", "example": "Aoife Byrne"},
@@ -56,6 +59,7 @@
       "method": "POST",
       "path": "/loans",
       "summary": "Lend a book to a member",
+      "tag": "Loans",
       "description": "A member can hold at most five books at a time.",
       "parameters": [
         {"name": "book_id", "in": "body", "type": "integer", "required": true, "description": "The book to lend", "example": 7},
@@ -71,6 +75,7 @@
       "method": "DELETE",
       "path": "/loans/{id}",
       "summary": "Return a book",
+      "tag": "Loans",
       "description": "Ends a loan when a member returns a book. The book becomes available to borrow again.",
       "parameters": [
         {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The loan id", "example": 9001}

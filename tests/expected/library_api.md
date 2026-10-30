@@ -7,9 +7,17 @@ A fictional API for a small community library. Use it to look up books, register
 
 ## Endpoints
 
+### Books
+
 - [GET /books](#get-books): List books
 - [GET /books/{id}](#get-booksid): Get one book
+
+### Members
+
 - [POST /members](#post-members): Register a member
+
+### Loans
+
 - [POST /loans](#post-loans): Lend a book to a member
 - [DELETE /loans/{id}](#delete-loansid): Return a book
 

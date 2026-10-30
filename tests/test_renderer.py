@@ -33,6 +33,33 @@ def tiny_spec(**endpoint_overrides):
     }
 
 
+def tagged_spec(*tags):
+    """A spec with one endpoint per tag, in the order given. None means no tag."""
+    endpoints = []
+    for number, tag in enumerate(tags):
+        endpoint = {
+            "method": "GET",
+            "path": f"/item{number}",
+            "summary": f"Item {number}",
+            "responses": [{"status": 200, "description": "OK"}],
+        }
+        if tag is not None:
+            endpoint["tag"] = tag
+        endpoints.append(endpoint)
+    return {
+        "name": "Tagged API",
+        "version": "1.0.0",
+        "base_url": "https://tagged.example.test",
+        "endpoints": endpoints,
+    }
+
+
+def table_of_contents(markdown):
+    """Return just the lines between '## Endpoints' and the first endpoint section."""
+    after = markdown.split("## Endpoints\n\n", 1)[1]
+    return after.split("\n## ", 1)[0].strip().splitlines()
+
+
 class GoldenFileTests(unittest.TestCase):
     def test_example_matches_golden_file(self):
         expected = (EXPECTED / "library_api.md").read_text(encoding="utf-8")
@@ -106,6 +133,47 @@ class RenderingRulesTests(unittest.TestCase):
         before = copy.deepcopy(spec)
         normalize_spec(spec)
         self.assertEqual(spec, before)
+
+
+class TagGroupingTests(unittest.TestCase):
+    def test_no_tags_gives_plain_list(self):
+        toc = table_of_contents(generate_markdown(tagged_spec(None, None)))
+        self.assertEqual(toc, [
+            "- [GET /item0](#get-item0): Item 0",
+            "- [GET /item1](#get-item1): Item 1",
+        ])
+
+    def test_groups_follow_first_appearance_order(self):
+        # Tags appear as B, A, B: groups must be B then A, not alphabetical.
+        toc = table_of_contents(generate_markdown(tagged_spec("B", "A", "B")))
+        self.assertEqual(toc, [
+            "### B",
+            "",
+            "- [GET /item0](#get-item0): Item 0",
+            "- [GET /item2](#get-item2): Item 2",
+            "",
+            "### A",
+            "",
+            "- [GET /item1](#get-item1): Item 1",
+        ])
+
+    def test_untagged_endpoints_go_in_other_at_end(self):
+        # If some endpoints don't have a tag, the untagged ones go in an Other group at the end.
+        toc = table_of_contents(generate_markdown(tagged_spec(None, "A")))
+        self.assertEqual(toc, [
+            "### A",
+            "",
+            "- [GET /item1](#get-item1): Item 1",
+            "",
+            "### Other",
+            "",
+            "- [GET /item0](#get-item0): Item 0",
+        ])
+
+    def test_endpoint_sections_keep_author_order(self):
+        # Grouping changes the table of contents only, never the sections.
+        markdown = generate_markdown(tagged_spec("B", "A", "B"))
+        self.assertLess(markdown.index("## GET /item1"), markdown.index("## GET /item2"))
 
 
 if __name__ == "__main__":

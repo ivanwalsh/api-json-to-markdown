@@ -14,6 +14,9 @@ import json
 
 from .curl import curl_lines
 
+# Table of contents heading for endpoints without a tag, when others have one.
+OTHER_GROUP = "Other"
+
 
 def render_markdown(spec):
     lines = [f"# {_one_line(spec['name'])}", ""]
@@ -31,10 +34,25 @@ def render_markdown(spec):
 
     anchors = _make_anchors(_endpoint_title(e) for e in spec["endpoints"])
 
+    # Collect the table of contents entries, grouped by tag. A dictionary
+    # keeps keys in the order they were first added, so groups appear in
+    # the order their tag first appears in the spec.
+    groups = {}
     for endpoint, anchor in zip(spec["endpoints"], anchors):
         title = _endpoint_title(endpoint)
-        lines.append(f"- [{title}](#{anchor}): {_one_line(endpoint['summary'])}")
-    lines.append("")
+        entry = f"- [{title}](#{anchor}): {_one_line(endpoint['summary'])}"
+        groups.setdefault(endpoint["tag"], []).append(entry)
+
+    if list(groups) == [""]:
+        # No endpoint has a tag: a plain list, exactly as before tags existed.
+        lines += groups[""] + [""]
+    else:
+        # Untagged endpoints (tag "") go in a group of their own, at the end.
+        untagged = groups.pop("", [])
+        if untagged:
+            groups.setdefault(OTHER_GROUP, []).extend(untagged)
+        for tag, entries in groups.items():
+            lines += [f"### {_one_line(tag)}", ""] + entries + [""]
 
     for endpoint in spec["endpoints"]:
         lines += _render_endpoint(endpoint, spec["base_url"])

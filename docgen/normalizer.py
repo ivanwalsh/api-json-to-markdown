@@ -27,6 +27,7 @@ def _normalize_endpoint(endpoint):
         "path": endpoint["path"].strip(),
         "summary": endpoint["summary"].strip(),
         "description": endpoint.get("description", "").strip(),
+        "tag": endpoint.get("tag", "").strip(),
         # Parameters keep the author's order.
         "parameters": [_normalize_parameter(p) for p in endpoint.get("parameters", [])],
         # Responses are always shown lowest status first.

@@ -74,6 +74,7 @@ def _check_endpoint(endpoint, where, errors):
 
     _check_string(endpoint, "summary", f"{where}.summary", errors, required=True)
     _check_string(endpoint, "description", f"{where}.description", errors, required=False)
+    _check_string(endpoint, "tag", f"{where}.tag", errors, required=False)
 
     parameters = _check_list(
         endpoint, "parameters", f"{where}.parameters", errors, required=False
