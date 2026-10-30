@@ -69,7 +69,7 @@ class CheckerTests(unittest.TestCase):
         del endpoint["parameters"][0]["example"]
         found = warnings_for(endpoint)
         self.assertEqual(codes(found), ["missing-param-example"])
-        self.assertEqual(found[0].location, "endpoints[0].parameters[0]")
+        self.assertEqual(found[0].location, "endpoints[0] (GET /books/{id}).parameters[0]")
 
     def test_optional_param_without_example_is_fine(self):
         endpoint = clean_endpoint()
@@ -92,7 +92,7 @@ class CheckerTests(unittest.TestCase):
     def test_unused_path_param(self):
         found = warnings_for(clean_endpoint(path="/books"))
         self.assertEqual(codes(found), ["unused-path-param"])
-        self.assertEqual(found[0].location, "endpoints[0].parameters[0]")
+        self.assertEqual(found[0].location, "endpoints[0] (GET /books).parameters[0]")
 
     def test_path_param_required(self):
         endpoint = clean_endpoint()
@@ -109,7 +109,7 @@ class CheckerTests(unittest.TestCase):
         endpoint = clean_endpoint(responses=[{"status": 200, "description": "OK"}])
         found = warnings_for(endpoint)
         self.assertEqual(codes(found), ["success-without-example"])
-        self.assertEqual(found[0].location, "endpoints[0] response 200")
+        self.assertEqual(found[0].location, "endpoints[0] (GET /books/{id}) response 200")
 
     def test_204_without_example_is_not_flagged(self):
         endpoint = clean_endpoint(
@@ -135,7 +135,7 @@ class CheckerTests(unittest.TestCase):
         found = warnings_for(clean_endpoint(parameters=[]))
         self.assertEqual(
             str(found[0]),
-            'endpoints[0]: path uses {id} but no parameter "id" has "in": "path" '
+            'endpoints[0] (GET /books/{id}): path uses {id} but no parameter "id" has "in": "path" '
             "[undeclared-path-param]",
         )
 
@@ -148,9 +148,9 @@ class CheckerTests(unittest.TestCase):
         self.assertEqual(
             [(w.location, w.code) for w in found],
             [
-                ("endpoints[0]", "missing-description"),
-                ("endpoints[1].summary", "summary-style"),
-                ("endpoints[1].summary", "summary-style"),
+                ("endpoints[0] (GET /books/{id})", "missing-description"),
+                ("endpoints[1] (GET /members/{id}).summary", "summary-style"),
+                ("endpoints[1] (GET /members/{id}).summary", "summary-style"),
             ],
         )
         self.assertEqual(found, warnings_for(first, second))  # same every run
@@ -166,11 +166,10 @@ class CheckerTests(unittest.TestCase):
         self.assertEqual(
             [(w.location, w.code) for w in found],
             [
-                ("endpoints[0]", "missing-description"),
-                ("endpoints[0] response 200", "success-without-example"),
+                ("endpoints[0] (GET /ping)", "missing-description"),
+                ("endpoints[0] (GET /ping) response 200", "success-without-example"),
             ],
         )
-
 
 if __name__ == "__main__":
     unittest.main()

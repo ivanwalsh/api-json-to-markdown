@@ -100,6 +100,7 @@ The validator asks "can we build docs from this?" The quality check asks "are th
 |---|---|
 | `summary-style` | A summary is over 80 characters or ends with a full stop |
 | `missing-description` | An endpoint has no description |
+| `description-style` | An endpoint description doesn't end with a full stop |
 | `missing-param-description` | A parameter has no description |
 | `missing-param-example` | A required parameter has no example (the curl command will show a placeholder) |
 | `path-param-required` | A path parameter isn't marked `required: true` |
@@ -111,7 +112,7 @@ The validator asks "can we build docs from this?" The quality check asks "are th
 Example output:
 
 ```
-  - endpoints[1]: no description [missing-description]
+  - endpoints[1] (GET /books/{id}): no description [missing-description]
 1 warning(s)
 ```
 

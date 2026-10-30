@@ -47,7 +47,7 @@ def check_spec(spec):
     """Return a list of QualityWarning for a normalized spec (empty if clean)."""
     warnings = []
     for index, endpoint in enumerate(spec["endpoints"]):
-        warnings += _check_endpoint(endpoint, f"endpoints[{index}]")
+        warnings += _check_endpoint(endpoint, f"endpoints[{index}] ({endpoint['method']} {endpoint['path']})")
     return warnings
 
 
