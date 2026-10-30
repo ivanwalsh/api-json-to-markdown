@@ -58,7 +58,7 @@ curl 'https://api.example-library.test/books?author=Yukio%20Mishima&available=tr
 
 Get one book
 
-Returns a single book by its ID, including whether it is available
+Returns a single book by its ID, including whether it is available.
 
 ### Parameters
 
@@ -91,7 +91,7 @@ curl 'https://api.example-library.test/books/7'
 
 Register a member
 
-Registers a member by its name and email address
+Registers a member by its name and email address.
 
 ### Parameters
 

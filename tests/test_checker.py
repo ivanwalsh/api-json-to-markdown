@@ -48,7 +48,17 @@ class CheckerTests(unittest.TestCase):
         endpoint = clean_endpoint()
         del endpoint["description"]
         self.assertEqual(codes(warnings_for(endpoint)), ["missing-description"])
-
+        
+    def test_description_without_full_stop(self):
+        endpoint = clean_endpoint()
+        endpoint["description"] = "This example sentence is missing a full stop"
+        self.assertEqual(codes(warnings_for(endpoint)), ["description-style"])
+        
+    def test_empty_description_gets_one_warning(self):
+        endpoint = clean_endpoint()
+        del endpoint["description"]
+        self.assertEqual(codes(warnings_for(endpoint)), ["missing-description"])
+    
     def test_missing_param_description(self):
         endpoint = clean_endpoint()
         del endpoint["parameters"][0]["description"]

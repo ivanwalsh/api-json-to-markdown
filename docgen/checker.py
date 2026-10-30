@@ -1,4 +1,4 @@
-"""Documentation quality check: find things that are valid but unhelpful.
+"""Documentation quality : find things that are valid but unhelpful.
 
 The validator asks "can we build docs from this?" The checker asks "are
 these docs any good?" Its findings are warnings: they never stop the
@@ -19,6 +19,7 @@ Rules:
     undeclared-path-param      {name} in the path has no path parameter
     no-success-response        endpoint has no 2xx response
     success-without-example    2xx response (not 204) has no example
+    description-style          description doesn't end with a full stop
 """
 
 import re
@@ -69,6 +70,10 @@ def _check_endpoint(endpoint, where):
 
     if not endpoint["description"]:
         warn(where, "no description", "missing-description")
+        
+    description = endpoint["description"]
+    if description and not description.endswith("."):
+        warn(f"{where}.description", "description should end with a full stop", "description-style")
 
     # --- Parameters ----------------------------------------------------------
     names_in_path = PATH_PLACEHOLDER.findall(endpoint["path"])
