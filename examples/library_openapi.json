@@ -1,0 +1,161 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Community Library API",
+    "version": "1.0.0",
+    "description": "A fictional API for a small community library. Use it to look up books, register members, and lend and return books."
+  },
+  "servers": [
+    {"url": "https://api.example-library.test"}
+  ],
+  "paths": {
+    "/books": {
+      "get": {
+        "summary": "List books",
+        "tags": ["Books"],
+        "description": "Returns books in the catalogue. Filters can be combined.",
+        "parameters": [
+          {"name": "author", "in": "query", "description": "Only books by this author", "schema": {"type": "string"}, "example": "Yukio Mishima"},
+          {"name": "available", "in": "query", "description": "true for books not currently on loan", "schema": {"type": "boolean"}, "example": true},
+          {"name": "limit", "in": "query", "description": "Maximum number of results (default 10)", "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of books",
+            "content": {
+              "application/json": {
+                "example": [
+                  {"id": 21, "title": "The Sound of Waves", "author": "Yukio Mishima", "available": true},
+                  {"id": 22, "title": "Spring Snow", "author": "Yukio Mishima", "available": true}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "summary": "Get one book",
+        "tags": ["Books"],
+        "description": "Returns a single book by its ID, including whether it is available.",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "description": "The book's id", "schema": {"type": "integer"}, "example": 7}
+        ],
+        "responses": {
+          "200": {
+            "description": "Book found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "mobyDick": {"$ref": "#/components/examples/MobyDick"}
+                }
+              }
+            }
+          },
+          "404": {"description": "No book with that id"}
+        }
+      }
+    },
+    "/members": {
+      "post": {
+        "summary": "Register a member",
+        "tags": ["Members"],
+        "description": "Registers a member by its name and email address.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/NewMember"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Member created",
+            "content": {
+              "application/json": {
+                "example": {"id": 301, "name": "Aoife Byrne", "email": "aoife@example.test"}
+              }
+            }
+          },
+          "400": {
+            "description": "Name or email is missing",
+            "content": {
+              "application/json": {
+                "example": {"error": "email is required"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/loans": {
+      "post": {
+        "summary": "Lend a book to a member",
+        "tags": ["Loans"],
+        "description": "A member can hold at most five books at a time.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["book_id", "member_id"],
+                "properties": {
+                  "book_id": {"type": "integer", "description": "The book to lend"},
+                  "member_id": {"type": "integer", "description": "The member borrowing it"}
+                }
+              },
+              "example": {"book_id": 7, "member_id": 301}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Loan created",
+            "content": {
+              "application/json": {
+                "example": {"id": 9001, "book_id": 7, "member_id": 301, "due": "2026-11-15"}
+              }
+            }
+          },
+          "409": {"description": "Book is already on loan"},
+          "404": {"description": "Book or member not found"}
+        }
+      }
+    },
+    "/loans/{id}": {
+      "delete": {
+        "summary": "Return a book",
+        "tags": ["Loans"],
+        "description": "Ends a loan when a member returns a book. The book becomes available to borrow again.",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "description": "The loan id", "schema": {"type": "integer"}, "example": 9001}
+        ],
+        "responses": {
+          "404": {"description": "No loan with that id"},
+          "204": {"description": "Book returned"}
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NewMember": {
+        "type": "object",
+        "required": ["name", "email"],
+        "properties": {
+          "name": {"type": "string", "description": "Full name", "example": "Aoife Byrne"},
+          "email": {"type": "string", "description": "Contact email address", "example": "aoife@example.test"}
+        }
+      }
+    },
+    "examples": {
+      "MobyDick": {
+        "summary": "A book that is on the shelf",
+        "value": {"id": 7, "title": "Moby Dick", "author": "Herman Melville", "available": true}
+      }
+    }
+  }
+}

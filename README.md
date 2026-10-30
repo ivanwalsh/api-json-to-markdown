@@ -6,7 +6,7 @@ You describe your API's endpoints, parameters and responses in one JSON file. Th
 
 Requirements: Python 3.10 or later. Standard library only, nothing to install.
 
-> **Note:** the input is this tool's own simplified JSON format (see [Spec schema](#spec-schema)), not OpenAPI or Swagger. OpenAPI support is planned.
+> **Input formats:** the tool reads its own simplified JSON format (see [Spec schema](#spec-schema)) and OpenAPI 3.0 and 3.1 files written in JSON (see [OpenAPI files](#openapi-files)). YAML support is planned.
 
 ## Get the code
 
@@ -23,6 +23,7 @@ Run these from the project folder:
 python -m docgen examples/library_api.json output/library_api.md   # write a file
 python -m docgen examples/library_api.json                         # print to screen
 python -m docgen --check examples/library_api.json                 # quality check only
+python -m docgen examples/library_openapi.json                     # works with OpenAPI too
 python -m unittest -v                                              # run all tests
 ```
 
@@ -33,13 +34,14 @@ Exit codes: `0` success, `1` the spec is invalid, `2` the file could not be read
 ## How it works
 
 ```
-JSON file -> load -> validate -> normalize -> render -> Markdown file
-                                           -> check  -> quality warnings
+JSON file -> load -> convert OpenAPI -> validate -> normalize -> render -> Markdown file
+                     (if needed)                             -> check  -> quality warnings
 ```
 
 | Step | Module | Job |
 |---|---|---|
 | Load | `docgen/loader.py` | Read the file, parse JSON. Broken JSON reports line and column. |
+| Convert | `docgen/openapi.py` | If the file is OpenAPI, reshape it into the simple format. Otherwise pass it through. |
 | Validate | `docgen/validator.py` | Check every schema rule and report all problems at once. |
 | Normalize | `docgen/normalizer.py` | Uppercase methods, fill defaults, sort responses, drop unknown fields. |
 | Render | `docgen/renderer.py` | Build Markdown text. Never touches files. |
@@ -53,7 +55,8 @@ JSON file -> load -> validate -> normalize -> render -> Markdown file
 
 ```
 docgen/            the application package
-examples/          library_api.json, the fictional Community Library API
+examples/          library_api.json, the fictional Community Library API,
+                   and library_openapi.json, the same API as OpenAPI
 output/            generated docs (safe to delete, regenerated on demand)
 tests/
   fixtures/        small valid and invalid JSON files
@@ -72,6 +75,26 @@ tests/
 **Response:** `status` (integer 100 to 599, unique per endpoint), `description` (required), `example` (any JSON, optional).
 
 Unknown fields are ignored. Endpoints and parameters keep the author's order. Responses are sorted by status code.
+
+## OpenAPI files
+
+If a file starts with an `openapi` version line, the tool converts it automatically. Use the same commands as for the simple format.
+
+| OpenAPI | Becomes |
+|---|---|
+| `info.title`, `info.version`, `info.description` | `name`, `version`, `description` |
+| First entry in `servers` | `base_url` |
+| Each path and method in `paths` | One endpoint, in file order |
+| `summary` (or `operationId` if missing) | `summary` |
+| First entry in `tags` | `tag` |
+| `parameters` (path, query, header) | `parameters` |
+| Properties of a JSON `requestBody` | Body parameters |
+| Responses with a numeric status code | `responses` |
+| `$ref` pointers such as `#/components/schemas/Book` | Followed and filled in |
+
+`examples/library_openapi.json` is the library API written as OpenAPI. It produces exactly the same Markdown as `examples/library_api.json`.
+
+**Not supported yet** (skipped quietly): Swagger 2.0 files, YAML files, cookie parameters, HEAD, OPTIONS and TRACE methods, `default` and `2XX`-style responses, non-JSON request and response bodies, and `$ref` pointers to other files.
 
 ## Example requests
 

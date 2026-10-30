@@ -25,6 +25,7 @@ from .checker import check_spec
 from .errors import SpecError, SpecFileError
 from .loader import load_spec
 from .normalizer import normalize_spec
+from .openapi import prepare_spec
 from .renderer import render_markdown
 from .validator import validate_spec
 
@@ -54,7 +55,7 @@ def main(argv=None):
         parser.error("--check does not write files, so leave out OUTPUT")
 
     try:
-        raw = load_spec(args.spec)
+        raw = prepare_spec(load_spec(args.spec))  # converts OpenAPI if needed
         validate_spec(raw)
     except SpecFileError as exc:
         print(f"Error: {exc}", file=sys.stderr)
