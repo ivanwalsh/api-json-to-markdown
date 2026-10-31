@@ -28,7 +28,7 @@ Follow these rules:
 
 6. Use present tense and active voice. Write `Returns a recording`, not `Will return a recording` or `A recording is returned`.
 
-7. Use consistent spelling. Use British English throughout, including spelling such as `catalogue` rather than `catalog`.
+7. Use consistent spelling. Use British English throughout, including spelling such as `catalogue` rather than `catalog`. Write ID in capitals in sentences. Only write `id`, in code font, when naming the field itself.
 
 8. Use a full stop. Every description must end with exactly one full stop. Do not leave the description without punctuation.
 
