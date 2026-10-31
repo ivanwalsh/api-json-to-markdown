@@ -1,0 +1,89 @@
+{
+  "name": "Concerto API",
+  "version": "1.0.0",
+  "description": "Returns a single recording by its ID, including its musical period and length.",
+  "base_url": "https://api.concerto.test",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/recordings",
+      "summary": "Search recordings",
+      "tag": "Recordings",
+      "description": "Returns recordings in the catalogue. Filters can be combined.",
+      "parameters": [
+        {"name": "composer", "in": "query", "type": "string", "description": "Only recordings of works by this composer", "example": "Bach"},
+        {"name": "period", "in": "query", "type": "string", "description": "Only recordings from this musical period, such as Baroque or Romantic"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Maximum number of results (default 10)"}
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "A list of recordings",
+          "example": [
+            {"id": 21, "composer": "J. S. Bach", "work": "Goldberg Variations, BWV 988", "performer": "Clara Vance", "year": 2019},
+            {"id": 22, "composer": "J. S. Bach", "work": "Brandenburg Concerto No. 3, BWV 1048", "performer": "Northgate Chamber Players", "year": 2021}
+          ]
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/recordings/{id}",
+      "summary": "Get one recording",
+      "tag": "Recordings",
+      "description": "Returns a single recording by its ID.",
+      "parameters": [
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The recording's id", "example": 21}
+      ],
+      "responses": [
+        {"status": 200, "description": "Recording found", "example": {"id": 21, "composer": "J. S. Bach", "work": "Goldberg Variations, BWV 988", "performer": "Clara Vance", "year": 2019, "period": "Baroque", "duration_seconds": 2745}},
+        {"status": 404, "description": "No recording with that id"}
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/members",
+      "summary": "Register a member",
+      "tag": "Members",
+      "description": "Registers a member by its name and email address.",
+      "parameters": [
+        {"name": "name", "in": "body", "type": "string", "required": true, "description": "Full name", "example": "Aoife Byrne"},
+        {"name": "email", "in": "body", "type": "string", "required": true, "description": "Contact email address", "example": "aoife@example.test"}
+      ],
+      "responses": [
+        {"status": 201, "description": "Member created", "example": {"id": 301, "name": "Aoife Byrne", "email": "aoife@example.test"}},
+        {"status": 400, "description": "Name or email is missing", "example": {"error": "email is required"}}
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/loans",
+      "summary": "Lend a book to a member",
+      "tag": "Loans",
+      "description": "A member can hold at most five books at a time.",
+      "parameters": [
+        {"name": "book_id", "in": "body", "type": "integer", "required": true, "description": "The book to lend", "example": 7},
+        {"name": "member_id", "in": "body", "type": "integer", "required": true, "description": "The member borrowing it", "example": 301}
+      ],
+      "responses": [
+        {"status": 201, "description": "Loan created", "example": {"id": 9001, "book_id": 7, "member_id": 301, "due": "2026-11-15"}},
+        {"status": 409, "description": "Book is already on loan"},
+        {"status": 404, "description": "Book or member not found"}
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/loans/{id}",
+      "summary": "Return a book",
+      "tag": "Loans",
+      "description": "Ends a loan when a member returns a book. The book becomes available to borrow again.",
+      "parameters": [
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The loan id", "example": 9001}
+      ],
+      "responses": [
+        {"status": 404, "description": "No loan with that id"},
+        {"status": 204, "description": "Book returned"}
+      ]
+    }
+  ]
+}
