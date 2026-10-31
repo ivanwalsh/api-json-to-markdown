@@ -42,47 +42,62 @@
     },
     {
       "method": "POST",
-      "path": "/members",
-      "summary": "Register a member",
-      "tag": "Members",
-      "description": "Registers a member by its name and email address.",
+      "path": "/playlists",
+      "summary": "Create a playlist",
+      "tag": "Playlists",
+      "description": "Creates a new, empty playlist. Add recordings to it afterwards.",
       "parameters": [
-        {"name": "name", "in": "body", "type": "string", "required": true, "description": "Full name", "example": "Aoife Byrne"},
-        {"name": "email", "in": "body", "type": "string", "required": true, "description": "Contact email address", "example": "aoife@example.test"}
+        {"name": "name", "in": "body", "type": "string", "required": true, "description": "The playlist's title, shown as listeners", "example": "Sunday morning baroque"},
+        {"name": "description", "in": "body", "type": "string", "description": "A short note about the playlist, such as its mood or occassion", "example": "Gentle music for a slow start"}
       ],
       "responses": [
-        {"status": 201, "description": "Member created", "example": {"id": 301, "name": "Aoife Byrne", "email": "aoife@example.test"}},
-        {"status": 400, "description": "Name or email is missing", "example": {"error": "email is required"}}
+        {"status": 201, "description": "Playlist created", "example": {"id": 521, "name": "Sunday morning baroque", "description": "Gentle music for a slow start"}},
+        {"status": 400, "description": "Name is missing", "example": {"error": "name is required"}}
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/playlists/{id}",
+      "summary": "Get a playlist",
+      "tag": "Playlists",
+      "description": "Returns a playlist with its recordings, in playing order, and its total length.",
+      "parameters": [
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The playlist's id", "example": 521}
+      ],
+      "responses": [
+        {"status": 200, "description": "Playlist found", "example": {"id": 521, "name": "Sunday morning baroque", "description": "Gentle music for a slow start", "total_duration_seconds": 3405, "tracks": [{"recording_id": 21, "composer": "J. S. Bach", "work": "Goldberg Variations, BWV 988", "duration_seconds": 2745}, {"recording_id": 22, "composer": "J. S. Bach", "work": "Brandenburg Concerto No. 3, BWV 1048", "duration_seconds": 660}]}},        
+        {"status": 404, "description": "No playlist with that id"}
       ]
     },
     {
       "method": "POST",
-      "path": "/loans",
-      "summary": "Lend a book to a member",
-      "tag": "Loans",
-      "description": "A member can hold at most five books at a time.",
+      "path": "/playlists/{id}/tracks",
+      "summary": "Add a recording to a playlist",
+      "tag": "Playlists",
+      "description": "Add a recording to the end of a playlist.",
       "parameters": [
-        {"name": "book_id", "in": "body", "type": "integer", "required": true, "description": "The book to lend", "example": 7},
-        {"name": "member_id", "in": "body", "type": "integer", "required": true, "description": "The member borrowing it", "example": 301}
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The playlist's id", "example": 521},
+        {"name": "recording_id", "in": "body", "type": "integer", "required": true, "description": "The recording to add", "example": 23}
       ],
       "responses": [
-        {"status": 201, "description": "Loan created", "example": {"id": 9001, "book_id": 7, "member_id": 301, "due": "2026-11-15"}},
-        {"status": 409, "description": "Book is already on loan"},
-        {"status": 404, "description": "Book or member not found"}
+        {"status": 201, "description": "Recording added to playlist", "example": {"id": 521, "recording_id": 23, "position": 3}},
+        {"status": 409, "description": "Recording is already in the playlist"},
+        {"status": 404, "description": "Playlist or recording not found"}
       ]
     },
     {
       "method": "DELETE",
-      "path": "/loans/{id}",
-      "summary": "Return a book",
-      "tag": "Loans",
-      "description": "Ends a loan when a member returns a book. The book becomes available to borrow again.",
+      "path": "/playlists/{id}/tracks/{recording_id}",
+      "summary": "Remove a recording from a playlist",
+      "tag": "Playlists",
+      "description": "Removes a recording from a playlist. The recordings after it move up one place.",
       "parameters": [
-        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The loan id", "example": 9001}
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The playlist id", "example": 521},
+        {"name": "recording_id", "in": "path", "type": "integer", "required": true, "description": "The recording to remove", "example": 23}
       ],
       "responses": [
-        {"status": 404, "description": "No loan with that id"},
-        {"status": 204, "description": "Book returned"}
+        {"status": 404, "description": "Playlist not found or the recording isn't in it"},
+        {"status": 204, "description": "Recording removed"}
       ]
     }
   ]
