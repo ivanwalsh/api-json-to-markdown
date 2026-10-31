@@ -4,9 +4,9 @@ Turn a JSON API spec into clear, ready-to-publish Markdown docs.
 
 You describe your API's endpoints, parameters and responses in one JSON file. The tool checks it, flags gaps in the documentation, and writes a Markdown reference with a table of contents, parameter tables, copy-and-paste curl examples and response samples. It's plain, deterministic Python: the same input always gives byte-for-byte the same output.
 
-Requirements: Python 3.10 or later. Standard library only, nothing to install.
+Requirements: Python 3.10 or later. Standard library only, nothing to install, unless you read YAML files (see [YAML files](#yaml-files)).
 
-> **Input formats:** the tool reads its own simplified JSON format (see [Spec schema](#spec-schema)) and OpenAPI 3.0 and 3.1 files written in JSON (see [OpenAPI files](#openapi-files)). YAML support is planned.
+> **Input formats:** the tool reads its own simplified JSON format (see [Spec schema](#spec-schema)) and OpenAPI 3.0 and 3.1 files written in JSON or YAML (see [OpenAPI files](#openapi-files)).
 
 ## Get the code
 
@@ -24,6 +24,7 @@ python -m docgen examples/library_api.json output/library_api.md   # write a fil
 python -m docgen examples/library_api.json                         # print to screen
 python -m docgen --check examples/library_api.json                 # quality check only
 python -m docgen examples/library_openapi.json                     # works with OpenAPI too
+python -m docgen examples/library_openapi.yaml                     # and with YAML
 python -m unittest -v                                              # run all tests
 ```
 
@@ -40,7 +41,7 @@ JSON file -> load -> convert OpenAPI -> validate -> normalize -> render -> Markd
 
 | Step | Module | Job |
 |---|---|---|
-| Load | `docgen/loader.py` | Read the file, parse JSON. Broken JSON reports line and column. |
+| Load | `docgen/loader.py` | Read the file, parse JSON or YAML. Broken files report line and column. |
 | Convert | `docgen/openapi.py` | If the file is OpenAPI, reshape it into the simple format. Otherwise pass it through. |
 | Validate | `docgen/validator.py` | Check every schema rule and report all problems at once. |
 | Normalize | `docgen/normalizer.py` | Uppercase methods, fill defaults, sort responses, drop unknown fields. |
@@ -56,7 +57,7 @@ JSON file -> load -> convert OpenAPI -> validate -> normalize -> render -> Markd
 ```
 docgen/            the application package
 examples/          library_api.json, the fictional Community Library API,
-                   and library_openapi.json, the same API as OpenAPI
+                   and library_openapi.json and .yaml, the same API as OpenAPI
 output/            generated docs (safe to delete, regenerated on demand)
 tests/
   fixtures/        small valid and invalid JSON files
@@ -94,7 +95,31 @@ If a file starts with an `openapi` version line, the tool converts it automatica
 
 `examples/library_openapi.json` is the library API written as OpenAPI. It produces exactly the same Markdown as `examples/library_api.json`.
 
-**Not supported yet** (skipped quietly): Swagger 2.0 files, YAML files, cookie parameters, HEAD, OPTIONS and TRACE methods, `default` and `2XX`-style responses, non-JSON request and response bodies, and `$ref` pointers to other files.
+**Not supported yet** (skipped quietly): Swagger 2.0 files, cookie parameters, HEAD, OPTIONS and TRACE methods, `default` and `2XX`-style responses, non-JSON request and response bodies, and `$ref` pointers to other files.
+
+## YAML files
+
+Files ending in `.yaml` or `.yml` are read as YAML. This works for OpenAPI files and for the tool's own simple format. Everything else is read as JSON.
+
+Reading YAML needs the PyYAML package. Many systems already have it. Check with:
+
+```
+python3 -c "import yaml; print(yaml.__version__)"
+```
+
+If it isn't installed, use `sudo dnf install python3-pyyaml` on Fedora, or `pip install pyyaml` elsewhere. JSON users never need it.
+
+The tool uses PyYAML's safe reader, which only reads data and never runs code hidden in a file.
+
+**YAML traps to watch for.** YAML guesses the type of unquoted values, which can quietly change your data:
+
+| You write | YAML reads | Fix |
+|---|---|---|
+| `due: 2026-11-15` | Kept as text by this tool, so no fix needed | |
+| `version: 1.0` | The number 1.0, which fails validation | `version: "1.0"` |
+| `country: NO` | `false` (also `yes`, `no`, `on`, `off`) | `country: "NO"` |
+
+When in doubt, put values in quotes.
 
 ## Example requests
 
