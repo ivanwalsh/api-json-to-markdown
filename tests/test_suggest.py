@@ -201,6 +201,14 @@ class ApplyTests(unittest.TestCase):
         self.assertEqual(spec["endpoints"][0]["description"], "My own words.")
         self.assertIn("already has a description", skipped[0])
 
+    def test_parameter_written_since_is_left_alone(self):
+        spec, entries = spec_with_gaps(), self.entries()
+        entries[1]["accepted"] = True
+        spec["endpoints"][0]["parameters"][0]["description"] = "My own words."
+        applied, skipped = suggest.apply_suggestions(spec, entries)
+        self.assertEqual(spec["endpoints"][0]["parameters"][0]["description"], "My own words.")
+        self.assertIn("already has a description", skipped[0])
+
     def test_renamed_endpoint_is_skipped(self):
         spec, entries = spec_with_gaps(), self.entries()
         entries[0]["accepted"] = True
