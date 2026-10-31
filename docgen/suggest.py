@@ -36,7 +36,7 @@ PARAMETER_FALLBACK = "Insufficient information to describe this parameter"
 API_URL = "https://api.anthropic.com/v1/messages"
 API_VERSION = "2023-06-01"
 DEFAULT_MODEL = "claude-haiku-5-5"  # small and fast, which suits short descriptions
-MAX_TOKENS = 200
+MAX_TOKENS = 2000
 
 PRIVACY_NOTE = (
     "Sending parts of this spec to Anthropic's API to draft descriptions. "
@@ -170,6 +170,8 @@ def _clean(text):
 
 
 def _endpoint_note(draft):
+    if not draft:
+        return "The AI returned no text. Run --suggest again, or write this one yourself."
     if draft == ENDPOINT_FALLBACK:
         return "The AI found too little information. Write this one yourself."
     if not draft.endswith("."):
@@ -178,6 +180,8 @@ def _endpoint_note(draft):
 
 
 def _parameter_note(draft):
+    if not draft:
+        return "The AI returned no text. Run --suggest again, or write this one yourself."
     if draft == PARAMETER_FALLBACK:
         return "The AI found too little information. Write this one yourself."
     if draft.endswith("."):
