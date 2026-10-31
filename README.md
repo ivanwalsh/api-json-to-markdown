@@ -25,12 +25,13 @@ python -m docgen examples/library_api.json                         # print to sc
 python -m docgen --check examples/library_api.json                 # quality check only
 python -m docgen examples/library_openapi.json                     # works with OpenAPI too
 python -m docgen examples/library_openapi.yaml                     # and with YAML
+python -m docgen --suggest examples/library_draft.json             # ask an AI to draft missing descriptions
 python -m unittest -v                                              # run all tests
 ```
 
 On Linux and macOS, use `python3` wherever this file says `python`.
 
-Exit codes: `0` success, `1` the spec is invalid, `2` the file could not be read, `3` `--check` found quality warnings.
+Exit codes: `0` success, `1` the spec is invalid, `2` the file could not be read or the AI service could not be used, `3` `--check` found quality warnings.
 
 ## How it works
 
@@ -48,6 +49,7 @@ JSON file -> load -> convert OpenAPI -> validate -> normalize -> render -> Markd
 | Render | `docgen/renderer.py` | Build Markdown text. Never touches files. |
 | Curl | `docgen/curl.py` | Build the example curl command for each endpoint. Called by the renderer. |
 | Check | `docgen/checker.py` | Find valid but unhelpful docs. Warnings only, never changes the Markdown. |
+| Suggest | `docgen/suggest.py` | Optional. Ask an AI to draft missing descriptions for a human to review. Rules live in `docgen/prompts/`. |
 | Write | `docgen/__main__.py` | Command line handling, save with `\n` line endings. |
 
 `docgen/errors.py` holds the two error types: `SpecError` (bad spec) and `SpecFileError` (cannot read file).
@@ -56,8 +58,10 @@ JSON file -> load -> convert OpenAPI -> validate -> normalize -> render -> Markd
 
 ```
 docgen/            the application package
+  prompts/         the rules the AI follows when drafting descriptions
 examples/          library_api.json, the fictional Community Library API,
-                   and library_openapi.json and .yaml, the same API as OpenAPI
+                   and library_openapi.json and .yaml, the same API as OpenAPI,
+                   and library_draft.json, a copy with gaps for trying --suggest
 output/            generated docs (safe to delete, regenerated on demand)
 tests/
   fixtures/        small valid and invalid JSON files
@@ -166,6 +170,49 @@ Example output:
 
 During normal generation, warnings go to standard error, so they never end up inside Markdown printed to the screen.
 
+## AI-drafted descriptions
+
+The checker finds missing descriptions. `--suggest` asks an AI to draft them, and you decide what goes in. **The AI never touches the Markdown**: it only proposes text for the spec, so the docs themselves stay deterministic.
+
+```
+python -m docgen --suggest examples/library_draft.json
+```
+
+This writes a review file next to the spec, `library_draft.suggestions.json`:
+
+```json
+{
+  "location": "endpoints[1] (GET /books/{id})",
+  "method": "GET",
+  "path": "/books/{id}",
+  "suggestion": "Returns a single book, including whether it is available.",
+  "accepted": false
+}
+```
+
+Change `false` to `true` for the drafts you want, and edit any wording. Then:
+
+```
+python -m docgen --apply-suggestions examples/library_draft.json
+git diff examples/library_draft.json
+```
+
+Only accepted drafts are written, each where a person would put it, and the review file is removed. Your spec keeps its layout, so `git diff` shows only the new lines.
+
+**Rules the AI follows** are plain text in `docgen/prompts/`: one file for endpoint descriptions, one for parameters. Edit them to change the house style, no code needed. Most importantly, they forbid inventing behaviour the spec doesn't support. When the facts aren't enough, the AI says so, and that placeholder can never be applied.
+
+**Setup.** You need an API key from the Anthropic Console (console.anthropic.com). Set it for the current terminal session; never put it in the code or in Git:
+
+```
+export ANTHROPIC_API_KEY='your-key-here'
+```
+
+`DOCGEN_MODEL` picks a different model if you want one. Requests use the standard library, so there's nothing to install.
+
+> **Privacy:** `--suggest` sends parts of your spec to Anthropic's API. Only use it on fictional or public specs, never on confidential ones.
+
+**Limits for now:** descriptions only (not examples), and only docgen's own JSON format (not OpenAPI or YAML files).
+
 ## Determinism rules
 
 - No timestamps, random values or machine paths in the output.
@@ -188,4 +235,4 @@ Only copy it across once you are sure the new output is what you want.
 
 ## About
 
-Built as a learning project, step by step, with a test for every rule. No AI is involved in generating the docs: every line of output comes from the spec, so the results are predictable and easy to review.
+Built as a learning project, step by step, with a test for every rule. No AI is involved in generating the docs: every line of output comes from the spec, so the results are predictable and easy to review. The optional `--suggest` command uses AI only to draft missing descriptions, and a person reviews every draft before it reaches the spec.

@@ -1,0 +1,87 @@
+{
+  "name": "Community Library API",
+  "version": "1.0.0",
+  "description": "A fictional API (draft with gaps, for trying --suggest) for a small community library. Use it to look up books, register members, and lend and return books.",
+  "base_url": "https://api.example-library.test",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/books",
+      "summary": "List books",
+      "tag": "Books",
+      "description": "Returns books in the catalogue. Filters can be combined.",
+      "parameters": [
+        {"name": "author", "in": "query", "type": "string", "description": "Only books by this author", "example": "Yukio Mishima"},
+        {"name": "available", "in": "query", "type": "boolean", "example": true},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Maximum number of results (default 10)"}
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "A list of books",
+          "example": [
+            {"id": 21, "title": "The Sound of Waves", "author": "Yukio Mishima", "available": true},
+            {"id": 22, "title": "Spring Snow", "author": "Yukio Mishima", "available": true}
+          ]
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/books/{id}",
+      "summary": "Get one book",
+      "tag": "Books",
+      "parameters": [
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The book's id", "example": 7}
+      ],
+      "responses": [
+        {"status": 200, "description": "Book found", "example": {"id": 7, "title": "Moby Dick", "author": "Herman Melville", "available": true}},
+        {"status": 404, "description": "No book with that id"}
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/members",
+      "summary": "Register a member",
+      "tag": "Members",
+      "description": "Registers a member by its name and email address.",
+      "parameters": [
+        {"name": "name", "in": "body", "type": "string", "required": true, "description": "Full name", "example": "Aoife Byrne"},
+        {"name": "email", "in": "body", "type": "string", "required": true, "description": "Contact email address", "example": "aoife@example.test"}
+      ],
+      "responses": [
+        {"status": 201, "description": "Member created", "example": {"id": 301, "name": "Aoife Byrne", "email": "aoife@example.test"}},
+        {"status": 400, "description": "Name or email is missing", "example": {"error": "email is required"}}
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/loans",
+      "summary": "Lend a book to a member",
+      "tag": "Loans",
+      "description": "A member can hold at most five books at a time.",
+      "parameters": [
+        {"name": "book_id", "in": "body", "type": "integer", "required": true, "description": "The book to lend", "example": 7},
+        {"name": "member_id", "in": "body", "type": "integer", "required": true, "example": 301}
+      ],
+      "responses": [
+        {"status": 201, "description": "Loan created", "example": {"id": 9001, "book_id": 7, "member_id": 301, "due": "2026-11-15"}},
+        {"status": 409, "description": "Book is already on loan"},
+        {"status": 404, "description": "Book or member not found"}
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/loans/{id}",
+      "summary": "Return a book",
+      "tag": "Loans",
+      "parameters": [
+        {"name": "id", "in": "path", "type": "integer", "required": true, "description": "The loan id", "example": 9001}
+      ],
+      "responses": [
+        {"status": 404, "description": "No loan with that id"},
+        {"status": 204, "description": "Book returned"}
+      ]
+    }
+  ]
+}

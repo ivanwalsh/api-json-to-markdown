@@ -22,3 +22,7 @@ class SpecError(Exception):
 
 class SpecFileError(Exception):
     """The spec file could not be read (missing, a folder, no permission)."""
+
+
+class ServiceError(Exception):
+    """The AI service could not be used (no API key, network or API error)."""
